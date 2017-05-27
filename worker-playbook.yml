@@ -1,0 +1,55 @@
+---
+- hosts: spark-workers
+  remote_user: ubuntu
+  gather_facts: False
+  environment:
+    PYTHONPATH: "{{ lookup('env','PYTHONPATH') }}:/home/ubuntu/.local/lib/python2.7/site-packages:/usr/local/lib/python2.7/dist-packages:/usr/local/lib/python2.7/site-packages"
+
+  tasks:
+    - name: Install python-minimal
+      raw: test -e /usr/bin/python || (apt-get -y update && apt-get install -y python-minimal)
+      become: yes
+      become_method: sudo
+
+    - name: Install (or update) docker.io
+      apt:
+        name: docker.io
+        state: latest
+        update_cache: yes
+      become: yes
+      become_method: sudo
+
+    - name: Install python-pip
+      apt:
+        name: python-pip
+        state: latest
+        update_cache: yes
+      become: yes
+      become_method: sudo
+
+    - name: Install certain python modules for docker
+      pip:
+        name: "{{ item.name }}"
+        version: "{{ item.version }}"
+        state: present
+      with_items:
+        - { name: docker, version: 2.0.0 }
+        - { name: docker-py, version: 1.10.6 }
+
+    - name: Pull alerguez/spark-worker image
+      docker_image:
+        name: alerguez/spark-worker
+      become: yes
+      become_method: sudo
+
+    - name: Create a data container
+      docker_container:
+        name: spark-worker
+        image: alerguez/spark-worker
+        detach: yes
+        network_mode: host
+        published_ports: 
+         - all
+      become: yes
+      become_method: sudo
+...
