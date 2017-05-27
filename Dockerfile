@@ -21,4 +21,4 @@ RUN tar -xvzf spark-2.1.0-bin-hadoop2.7.tgz \
 
 WORKDIR /opt/spark-2.1.0-bin-hadoop2.7
 
-CMD ./bin/spark-class org.apache.spark.deploy.worker.Worker spark://sparkmaster.ddns.net:7077 
+CMD ./bin/spark-class org.apache.spark.deploy.worker.Worker spark://tfmsparkgeomesa.ddns.net:7077 
